@@ -1,0 +1,53 @@
+{
+  "name": "jiwalu-photo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "backend:dev": "cd backend && go run ./cmd/api",
+    "hardware:dev": "cd backend && ALLOWED_ORIGINS=http://localhost:5173,http://localhost:8788 go run ./cmd/camera-agent",
+    "kiosk:start": "npm run build -- --mode kiosk && cd backend && go run ./cmd/api",
+    "backend:admin": "cd backend && go run ./cmd/admin",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node scripts/pm2-start.cjs",
+    "test": "vitest",
+    "tauri": "tauri",
+    "desktop:dev": "tauri dev",
+    "desktop:build": "tauri build",
+    "desktop:dist": "npm run desktop:build -- --bundles nsis",
+    "desktop:dist:mac": "npm run desktop:build -- --bundles dmg"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^7.3.1",
+    "@fortawesome/free-solid-svg-icons": "^7.3.1",
+    "@fortawesome/react-fontawesome": "^3.5.0",
+    "@mediapipe/camera_utils": "^0.3.1675466862",
+    "@mediapipe/drawing_utils": "^0.3.1675466124",
+    "@mediapipe/face_mesh": "^0.4.1633559619",
+    "@supabase/supabase-js": "^2.108.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "deepar": "^5.6.22",
+    "gifshot": "^0.4.5",
+    "midtrans-client": "^1.4.3",
+    "qrcode.react": "^4.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^3.6.0",
+    "vite": "^6.4.3",
+    "web-gphoto2": "^0.4.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@tauri-apps/cli": "^2.11.4",
+    "concurrently": "^10.0.4",
+    "electron": "^43.2.0",
+    "electron-builder": "^26.15.3",
+    "jsdom": "^22.1.0",
+    "tailwindcss": "^4.3.3",
+    "vitest": "^0.34.6"
+  }
+}

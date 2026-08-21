@@ -1,0 +1,15 @@
+{
+  "name": "urbanmenphoto-api",
+  "main": "./src/index.js",
+  "compatibility_date": "2026-07-19",
+  "d1_databases": [
+    { "binding": "DB", "database_name": "urbanmenphoto", "database_id": "REPLACE_WITH_D1_DATABASE_ID" }
+  ],
+  "r2_buckets": [
+    { "binding": "MEDIA", "bucket_name": "urbanmenphoto-media" }
+  ],
+  "vars": {
+    "ALLOWED_ORIGINS": "https://urbanmenphoto.hilmansulaeman0504.workers.dev",
+    "PUBLIC_BASE_URL": "https://urbanmenphoto-api.REPLACE.workers.dev"
+  }
+}

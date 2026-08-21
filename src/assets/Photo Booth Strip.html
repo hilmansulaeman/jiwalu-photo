@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="id">
+ <head><script src="/_sdk/telemetry_sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photo Booth Strip</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;700&amp;family=Caveat:wght@700&amp;display=swap" rel="stylesheet">
+  <style>
+        body { font-family: 'Fraunces', serif; }
+        .handwritten { font-family: 'Caveat', cursive; }
+    </style>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/resizing_sdk.js" type="text/javascript"></script>
+ </head>
+ <body data-template-id="__page-root" class="min-h-screen flex items-center justify-center p-6">
+  <main class="w-[280px] max-w-full">
+   <div data-template-id="strip-bg" class="canva-card rounded-lg p-4 shadow-2xl space-y-3">
+    <h1 data-template-id="strip-title" class="canva-text handwritten text-center text-2xl"></h1>
+    <div class="space-y-3"><img data-template-id="photo-1" class="canva-image w-full aspect-[4/3] object-cover rounded" loading="lazy"> <img data-template-id="photo-2" class="canva-image w-full aspect-[4/3] object-cover rounded" loading="lazy"> <img data-template-id="photo-3" class="canva-image w-full aspect-[4/3] object-cover rounded" loading="lazy"> <img data-template-id="photo-4" class="canva-image w-full aspect-[4/3] object-cover rounded" loading="lazy">
+    </div>
+    <p data-template-id="strip-date" class="canva-text handwritten text-center text-lg"></p>
+    <p data-template-id="strip-caption" class="canva-text text-center text-sm"></p>
+   </div>
+  </main>
+  <script src="/_sdk/editing_sdk.js"></script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1122aa856e2f879',t:'MTc4MjM3MTU3NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

@@ -1,0 +1,12 @@
+[package]
+name = "urbanmen-photo-kiosk"
+version = "1.0.0"
+description = "Customer-facing Urbanmen Photo kiosk"
+authors = ["Urbanmen Photo"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }

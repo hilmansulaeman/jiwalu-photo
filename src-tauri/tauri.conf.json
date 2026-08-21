@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Urbanmen Photo Kiosk",
+  "version": "1.0.0",
+  "identifier": "id.urbanmen.photobox",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:5173",
+    "beforeBuildCommand": "npm run build -- --mode tauri",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Urbanmen Photo Kiosk",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 1024,
+        "minHeight": 640,
+        "fullscreen": true,
+        "decorations": false,
+        "resizable": false,
+        "visible": true
+      }
+    ],
+    "security": {
+      "capabilities": [
+        "default"
+      ]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Photography",
+    "shortDescription": "Customer photobooth kiosk",
+    "longDescription": "React customer kiosk for Urbanmen Photo.",
+    "macOS": {
+      "infoPlist": "Info.plist"
+    }
+  }
+}

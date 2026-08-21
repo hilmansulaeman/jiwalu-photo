@@ -1,0 +1,617 @@
+openapi: 3.0.3
+info:
+  title: Urbanmenphoto Backend API
+  version: 0.1.0
+  description: API contract for Urbanmenphoto photobooth sessions, gallery, admin, payments, frames, and delivery logs.
+servers:
+  - url: http://localhost:8787
+security:
+  - AdminApiKey: []
+paths:
+  /:
+    get:
+      tags: [System]
+      summary: API status
+      security: []
+      responses:
+        "200":
+          description: Backend status
+  /health:
+    get:
+      tags: [System]
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: Health response
+  /api/sessions:
+    post:
+      tags: [Sessions]
+      summary: Create a photo session
+      security: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSessionRequest"
+      responses:
+        "201":
+          description: Created session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+  /api/sessions/{id}:
+    get:
+      tags: [Sessions]
+      summary: Get a session
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+        - $ref: "#/components/parameters/CustomerSessionToken"
+      responses:
+        "200":
+          description: Session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+    patch:
+      tags: [Sessions]
+      summary: Update session metadata
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+        - $ref: "#/components/parameters/CustomerSessionToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchSessionRequest"
+      responses:
+        "200":
+          description: Updated session
+  /api/sessions/{id}/finalize:
+    post:
+      tags: [Sessions]
+      summary: Upload final print and optional gallery images
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+        - $ref: "#/components/parameters/CustomerSessionToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FinalizeSessionRequest"
+      responses:
+        "200":
+          description: Finalized session
+  /api/sessions/{id}/send-link:
+    post:
+      tags: [Delivery]
+      summary: Queue or record a delivery link send
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+        - $ref: "#/components/parameters/CustomerSessionToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendLinkRequest"
+      responses:
+        "202":
+          description: Send request recorded
+  /api/sessions/{id}/expire:
+    post:
+      tags: [Sessions]
+      summary: Expire a session manually
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+        - $ref: "#/components/parameters/CustomerSessionToken"
+      responses:
+        "200":
+          description: Expired session
+  /api/galleries/{sessionId}:
+    get:
+      tags: [Galleries]
+      summary: Get gallery download data
+      security: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Gallery
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GalleryResponse"
+        "410":
+          description: Gallery link expired
+  /api/payments:
+    post:
+      tags: [Payments]
+      summary: Create a payment record
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/CustomerSessionToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePaymentRequest"
+      responses:
+        "201":
+          description: Payment created
+  /api/payments/{id}:
+    get:
+      tags: [Payments]
+      summary: Get payment
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Payment
+  /api/payments/{id}/webhook:
+    post:
+      tags: [Payments]
+      summary: Update payment status from webhook
+      security:
+        - WebhookSecret: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentWebhookRequest"
+      responses:
+        "200":
+          description: Payment updated
+  /api/frames:
+    get:
+      tags: [Frames]
+      summary: List active frames
+      security: []
+      responses:
+        "200":
+          description: Active frames
+  /api/admin/auth/login:
+    post:
+      tags: [Admin]
+      summary: Login admin with email and password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminLoginRequest"
+      responses:
+        "200":
+          description: Admin token response
+  /api/admin/auth/logout:
+    post:
+      tags: [Admin]
+      summary: Logout current admin token
+      responses:
+        "200":
+          description: Token revoked
+  /api/admin/auth/me:
+    get:
+      tags: [Admin]
+      summary: Check current admin credentials
+      responses:
+        "200":
+          description: Authenticated admin
+  /api/admin/users:
+    get:
+      tags: [Admin]
+      summary: List admin users
+      responses:
+        "200":
+          description: Admin users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUsersResponse"
+    post:
+      tags: [Admin]
+      summary: Create admin user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAdminUserRequest"
+      responses:
+        "201":
+          description: Created admin user
+  /api/admin/users/{id}:
+    patch:
+      tags: [Admin]
+      summary: Update admin user role or password
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdminUserRequest"
+      responses:
+        "200":
+          description: Updated admin user
+    delete:
+      tags: [Admin]
+      summary: Delete admin user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+  /api/admin/sessions:
+    get:
+      tags: [Admin]
+      summary: List sessions
+      responses:
+        "200":
+          description: Sessions
+  /api/admin/sessions/{id}:
+    get:
+      tags: [Admin]
+      summary: Get admin session detail
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "200":
+          description: Session with messages and payments
+    delete:
+      tags: [Admin]
+      summary: Delete session and local files
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "204":
+          description: Deleted
+  /api/admin/stats:
+    get:
+      tags: [Admin]
+      summary: Get dashboard stats
+      responses:
+        "200":
+          description: Stats
+  /api/admin/messages:
+    get:
+      tags: [Admin]
+      summary: List delivery logs
+      responses:
+        "200":
+          description: Messages
+  /api/admin/payments:
+    get:
+      tags: [Admin]
+      summary: List payments
+      responses:
+        "200":
+          description: Payments
+  /api/admin/payment-logs:
+    get:
+      tags: [Admin]
+      summary: List payment event logs
+      parameters:
+        - name: paymentId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Payment logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentLogsResponse"
+  /api/admin/transactions:
+    get:
+      tags: [Admin]
+      summary: List transaction report rows
+      responses:
+        "200":
+          description: Transactions
+  /api/admin/audit-logs:
+    get:
+      tags: [Admin]
+      summary: List admin and webhook audit logs
+      responses:
+        "200":
+          description: Audit logs
+  /api/admin/cleanup:
+    post:
+      tags: [Admin]
+      summary: Delete expired sessions and files
+      responses:
+        "200":
+          description: Cleanup result
+  /api/admin/frames:
+    get:
+      tags: [Admin]
+      summary: List all frames
+      responses:
+        "200":
+          description: Frames
+    post:
+      tags: [Admin]
+      summary: Create frame metadata
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpsertFrameRequest"
+      responses:
+        "200":
+          description: Saved frame
+  /api/admin/frames/{id}:
+    put:
+      tags: [Admin]
+      summary: Update frame metadata
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpsertFrameRequest"
+      responses:
+        "200":
+          description: Saved frame
+    delete:
+      tags: [Admin]
+      summary: Delete frame metadata
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+components:
+  securitySchemes:
+    AdminApiKey:
+      type: http
+      scheme: bearer
+    WebhookSecret:
+      type: apiKey
+      in: header
+      name: x-webhook-secret
+  parameters:
+    SessionId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    CustomerSessionToken:
+      name: x-session-token
+      in: header
+      required: true
+      description: Customer session token returned once by POST /api/sessions.
+      schema:
+        type: string
+  schemas:
+    CreateSessionRequest:
+      type: object
+      properties:
+        email: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+        layoutId: { type: string, nullable: true, example: layout-3 }
+        paperSize: { type: string, nullable: true, example: 4r }
+        frameId: { type: string, nullable: true }
+    PatchSessionRequest:
+      allOf:
+        - $ref: "#/components/schemas/CreateSessionRequest"
+        - type: object
+          properties:
+            status: { type: string }
+    FinalizeSessionRequest:
+      type: object
+      properties:
+        email: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+        layoutId: { type: string, nullable: true }
+        paperSize: { type: string, nullable: true }
+        frameId: { type: string, nullable: true }
+        finalImage:
+          type: string
+          description: Data URL image. Only image/jpeg, image/png, and image/webp are accepted. Decoded image max size is 8 MB.
+        printImage:
+          type: string
+          description: Data URL print image. Only image/jpeg, image/png, and image/webp are accepted. Decoded image max size is 8 MB.
+        animatedImage:
+          type: string
+          description: Data URL animated result. image/gif, image/jpeg, image/png, and image/webp are accepted. Decoded image max size is 8 MB.
+        images:
+          type: array
+          maxItems: 16
+          items:
+            type: string
+            description: Data URL image. Only image/jpeg, image/png, and image/webp are accepted. Decoded image max size is 8 MB.
+    SendLinkRequest:
+      type: object
+      properties:
+        channel: { type: string, example: email }
+        recipient: { type: string, nullable: true }
+        email: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+    CreatePaymentRequest:
+      type: object
+      required: [sessionId, amount]
+      properties:
+        sessionId: { type: string }
+        provider: { type: string, example: manual }
+        amount: { type: integer, format: int64, example: 50000 }
+        currency: { type: string, example: IDR }
+    PaymentWebhookRequest:
+      type: object
+      properties:
+        paymentId: { type: string }
+        sessionId: { type: string }
+        status: { type: string, example: paid }
+    AdminLoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, example: admin@urbanmenphoto.com }
+        password: { type: string, format: password }
+    CreateAdminUserRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, example: staff@urbanmenphoto.com }
+        password: { type: string, format: password, minLength: 10 }
+        role: { type: string, enum: [owner, staff], example: staff }
+    UpdateAdminUserRequest:
+      type: object
+      properties:
+        password: { type: string, format: password, minLength: 10 }
+        role: { type: string, enum: [owner, staff] }
+    AdminUser:
+      type: object
+      properties:
+        id: { type: string }
+        email: { type: string }
+        role: { type: string, enum: [owner, staff] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    AdminUsersResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminUser"
+    PaymentLog:
+      type: object
+      properties:
+        id: { type: string }
+        paymentId: { type: string }
+        sessionId: { type: string }
+        event: { type: string, example: payment.created }
+        provider: { type: string }
+        amount: { type: integer, format: int64 }
+        currency: { type: string }
+        statusBefore: { type: string, nullable: true }
+        statusAfter: { type: string }
+        providerRef: { type: string, nullable: true }
+        requestPayload: { type: string }
+        ip: { type: string }
+        userAgent: { type: string }
+        createdAt: { type: string, format: date-time }
+    PaymentLogsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PaymentLog"
+    UpsertFrameRequest:
+      type: object
+      required: [name, imageUrl]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        category: { type: string, example: custom }
+        layoutCount: { type: integer, example: 3 }
+        imageUrl: { type: string }
+        slotJson: { type: string }
+        active: { type: boolean }
+    StoredImage:
+      type: object
+      properties:
+        key: { type: string }
+        url: { type: string }
+        mimeType: { type: string }
+        size: { type: integer, format: int64 }
+    Session:
+      type: object
+      properties:
+        id: { type: string }
+        shortCode: { type: string }
+        email: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+        layoutId: { type: string, nullable: true }
+        paperSize: { type: string, nullable: true }
+        frameId: { type: string, nullable: true }
+        status: { type: string }
+        finalImage:
+          $ref: "#/components/schemas/StoredImage"
+        images:
+          type: array
+          items: { type: string }
+        downloadUrl: { type: string }
+        customerToken:
+          type: string
+          description: Returned only when a session is created. Send it as x-session-token for customer session mutations.
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        expiresAt: { type: string, format: date-time }
+    Gallery:
+      type: object
+      properties:
+        sessionId: { type: string }
+        status: { type: string }
+        finalImage:
+          $ref: "#/components/schemas/StoredImage"
+        images:
+          type: array
+          items: { type: string }
+        downloadUrl: { type: string }
+        expiresAt: { type: string, format: date-time }
+        expired: { type: boolean }
+    SessionResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/Session"
+    GalleryResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/Gallery"

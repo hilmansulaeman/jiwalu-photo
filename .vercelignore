@@ -1,0 +1,17 @@
+# Vercel hosts only the React/Vite frontend. Device software is copied to the
+# Windows booth PC separately and exceeds Vercel's upload limit.
+hardware-agent/
+hardware-agent.zip
+release/
+installer/
+backend/cmd/camera-agent/
+backend/.cache/
+backend/data/
+backend/storage/
+.env
+.env.local
+backend/.env
+backend/.env.local
+.vercel/
+node_modules/
+dist/

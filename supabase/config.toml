@@ -1,0 +1,4 @@
+project_id = "urbanmenphoto"
+
+[functions.api]
+verify_jwt = false

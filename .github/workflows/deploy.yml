@@ -1,0 +1,93 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - dev
+      - staging
+      - main
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Deployment target
+        required: true
+        default: dev
+        type: choice
+        options:
+          - dev
+          - staging
+          - all
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref_name }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+
+  deploy-backend-staging:
+    name: Deploy Backend Staging
+    runs-on: ubuntu-latest
+    if: >
+      github.ref_name == 'staging' ||
+      github.ref_name == 'main' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.target == 'staging' || inputs.target == 'all'))
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_STAGING_PROJECT_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Link Vercel project
+        working-directory: backend
+        run: |
+          mkdir -p .vercel
+          printf '{"orgId":"%s","projectId":"%s"}' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
+
+      - name: Deploy to Vercel
+        working-directory: backend
+        run: npx vercel@54.18.6 deploy --prod --yes --token "$VERCEL_TOKEN"
+
+  deploy-frontend-staging:
+    name: Deploy Frontend Staging
+    runs-on: ubuntu-latest
+    needs: deploy-backend-staging
+    if: >
+      github.ref_name == 'staging' ||
+      github.ref_name == 'main' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.target == 'staging' || inputs.target == 'all'))
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FRONTEND_STAGING_PROJECT_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Link Vercel project
+        run: |
+          mkdir -p .vercel
+          printf '{"orgId":"%s","projectId":"%s"}' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
+
+      - name: Deploy to Vercel
+        run: npx vercel@54.18.6 deploy --prod --yes --token "$VERCEL_TOKEN"

@@ -1,0 +1,16 @@
+node_modules/
+dist/
+src-tauri/target/
+hardware-agent/dist/
+hardware-agent/vendor/edsdk/
+hardware-agent/src/HardwareAgent/bin/
+hardware-agent/src/HardwareAgent/obj/
+backend/.env
+backend/data/
+backend/storage/
+backend/.cache/
+backend/backend/data/
+backend/backend/storage/
+.vercel
+.env*
+!.env.development
