@@ -11,7 +11,7 @@ import FilterPanel from './components/FilterPanel.jsx';
 import { FILTERS } from './utils/photoConfig.js';
 import MobileGalleryView from './components/MobileGalleryView.jsx';
 import AdminDashboard from './components/AdminDashboard.jsx';
-import { syncKioskSettings } from './utils/kioskConfig.js';
+import { syncKioskSettings, getKioskSettings } from './utils/kioskConfig.js';
 import logoJiwalu from './assets/logo-jiwalu.svg';
 
 const STEPS = {
@@ -26,7 +26,11 @@ const STEPS = {
   THANK_YOU: 'THANK_YOU',
 };
 
-const SESSION_DURATION_MS = 5 * 60 * 1000;
+const getSessionDurationMs = () => {
+  const settings = getKioskSettings();
+  const minutes = parseFloat(settings.sessionTimer) || 5;
+  return Math.floor(minutes * 60 * 1000);
+};
 
 function formatRemainingTime(milliseconds) {
   const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
@@ -74,7 +78,7 @@ export default function App() {
   const [capturedPhotos, setCapturedPhotos] = useState([]);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
   const [sessionExpiresAt, setSessionExpiresAt] = useState(null);
-  const [remainingSessionMs, setRemainingSessionMs] = useState(SESSION_DURATION_MS);
+  const [remainingSessionMs, setRemainingSessionMs] = useState(0);
   const [backendSession, setBackendSession] = useState(null);
   const [backendPayment, setBackendPayment] = useState(null);
 
@@ -113,7 +117,7 @@ export default function App() {
     setCapturedPhotos([]);
     setSelectedPhotos([]);
     setSessionExpiresAt(null);
-    setRemainingSessionMs(SESSION_DURATION_MS);
+    setRemainingSessionMs(getSessionDurationMs());
     setBackendSession(null);
     setBackendPayment(null);
   };
@@ -121,8 +125,9 @@ export default function App() {
   const startTimedSession = ({ session, payment } = {}) => {
     setBackendSession(session || null);
     setBackendPayment(payment || null);
-    setSessionExpiresAt(Date.now() + SESSION_DURATION_MS);
-    setRemainingSessionMs(SESSION_DURATION_MS);
+    const duration = getSessionDurationMs();
+    setSessionExpiresAt(Date.now() + duration);
+    setRemainingSessionMs(duration);
     setCurrentStep(STEPS.CAMERA);
   };
 

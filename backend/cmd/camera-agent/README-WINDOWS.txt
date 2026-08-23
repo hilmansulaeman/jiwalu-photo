@@ -3,7 +3,7 @@ URBANMEN PHOTO - CAMERA AGENT FOR WINDOWS
 PHASE 1 - ONE CANON CAMERA VIA ZADIG / WINUSB
 
 1. Connect one powered-on Canon DSLR in photo mode with a data USB cable.
-2. Use Zadig to install WinUSB for that exact camera. Close Dreambooth,
+2. Use Zadig to install WinUSB for that exact camera. Close Jiwaluphotobooth,
    EOS Utility, Chrome, and every other camera application afterward.
 3. Install the Windows/MSYS2 build of gphoto2 and its libgphoto2/libusb
    dependencies. Set GPHOTO2_PATH in camera-agent.env to gphoto2.exe.

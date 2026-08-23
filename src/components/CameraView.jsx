@@ -262,8 +262,10 @@ export default function CameraView({ filter, poseLimit = 5, onFinishSession }) {
     if (isRecordingBurst || !isReady) return;
 
     if (countdown === null) {
-      // Start countdown at 3
-      setCountdown(3);
+      // Start countdown at configured timer or default to 3
+      const currentSettings = getKioskSettings();
+      const timer = parseInt(currentSettings.cameraTimer, 10);
+      setCountdown(isNaN(timer) ? 3 : timer);
       return;
     }
 

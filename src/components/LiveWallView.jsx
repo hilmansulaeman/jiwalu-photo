@@ -90,22 +90,22 @@ const createAnimatedGIF = (photos = []) => {
   return new Promise((resolve) => {
     import('gifshot').then((module) => {
       const gifshot = module.default || module;
-    gifshot.createGIF({
-      images: frames,
-      gifWidth: 640,
-      gifHeight: 640,
-      interval: 0.14,
-      numFrames: frames.length,
-      frameDuration: 1,
-      sampleInterval: 10,
-    }, (result) => {
-      if (result?.error) {
-        console.error('Failed to create GIF', result.errorMsg || result.error);
-        resolve('');
-        return;
-      }
-      resolve(result?.image || '');
-    });
+      gifshot.createGIF({
+        images: frames,
+        gifWidth: 640,
+        gifHeight: 640,
+        interval: 0.14,
+        numFrames: frames.length,
+        frameDuration: 1,
+        sampleInterval: 10,
+      }, (result) => {
+        if (result?.error) {
+          console.error('Failed to create GIF', result.errorMsg || result.error);
+          resolve('');
+          return;
+        }
+        resolve(result?.image || '');
+      });
     }).catch((err) => {
       console.error('Failed to load GIF generator', err);
       resolve('');
@@ -650,7 +650,6 @@ export default function LiveWallView({ orderDetails, upsellDetails, capturedPhot
           </div>
         </div>
 
-        </div>
       </div>
     );
   }
@@ -706,7 +705,7 @@ export default function LiveWallView({ orderDetails, upsellDetails, capturedPhot
             </div>
 
             <p style={{ color: '#9ca3af', fontSize: '0.85rem', textAlign: 'center', margin: '1.5rem 0 0', lineHeight: '1.4' }}>
-              You can change this preference anytime by contacting our support team<br/>at dreamboothstudio.com.
+              You can change this preference anytime by contacting our support team<br />at jiwaluphotobooth.com.
             </p>
           </div>
         </div>

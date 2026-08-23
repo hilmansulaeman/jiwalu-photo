@@ -613,6 +613,7 @@ function KioskSettingsTab({ projectId, adminToken, onBack }) {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
+      saveKioskSettings(settings);
       if (projectId) {
         await backendRequest(`/api/admin/projects/${projectId}`, adminToken, {
           method: 'PATCH',
@@ -1080,17 +1081,44 @@ function KioskSettingsTab({ projectId, adminToken, onBack }) {
           />
         </div>
 
-        <div style={{ marginBottom: '2rem' }}>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: '#495057' }}>Idle Timeout (Detik)</label>
-          <input
-            type="number"
-            name="idleTimeout"
-            value={settings.idleTimeout ?? 60}
-            onChange={handleChange}
-            min="10" max="300"
-            style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ced4da', fontSize: '1rem' }}
-          />
-          <p style={{ fontSize: '0.8rem', color: '#868e96', marginTop: '0.3rem' }}>Waktu diam sebelum sistem otomatis kembali ke layar awal.</p>
+        <div style={{ marginBottom: '2rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 200px' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: '#495057' }}>Idle Timeout (Detik)</label>
+            <input
+              type="number"
+              name="idleTimeout"
+              value={settings.idleTimeout ?? 60}
+              onChange={handleChange}
+              min="10" max="300"
+              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ced4da', fontSize: '1rem' }}
+            />
+            <p style={{ fontSize: '0.8rem', color: '#868e96', marginTop: '0.3rem' }}>Waktu diam sebelum otomatis ke layar awal.</p>
+          </div>
+          <div style={{ flex: '1 1 200px' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: '#495057' }}>Countdown Kamera (Detik)</label>
+            <input
+              type="number"
+              name="cameraTimer"
+              value={settings.cameraTimer ?? 3}
+              onChange={handleChange}
+              min="1" max="15"
+              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ced4da', fontSize: '1rem' }}
+            />
+            <p style={{ fontSize: '0.8rem', color: '#868e96', marginTop: '0.3rem' }}>Waktu hitung mundur sebelum mengambil foto.</p>
+          </div>
+          <div style={{ flex: '1 1 200px' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', color: '#495057' }}>Durasi Sesi (Menit)</label>
+            <input
+              type="number"
+              name="sessionTimer"
+              value={settings.sessionTimer ?? 5}
+              onChange={handleChange}
+              min="1" max="60"
+              step="0.5"
+              style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ced4da', fontSize: '1rem' }}
+            />
+            <p style={{ fontSize: '0.8rem', color: '#868e96', marginTop: '0.3rem' }}>Waktu total durasi sesi pelanggan (dalam menit).</p>
+          </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

@@ -23,7 +23,9 @@ export const defaultSettings = {
   printMode: 'hardware_agent',
   printDelaySeconds: 1.5,
   printerName: '',
-  printNote: ''
+  printNote: '',
+  cameraTimer: 3,
+  sessionTimer: 5
 };
 
 const createLegacyCameraProfiles = (settings = {}) => ([
@@ -150,8 +152,9 @@ export function setActiveProjectId(id) {
 export async function syncKioskSettings() {
   try {
     const projectId = getActiveProjectId();
-    const url = projectId ? `${getBackendApiUrl()}/api/settings?projectId=${projectId}` : `${getBackendApiUrl()}/api/settings`;
-    const res = await fetch(url);
+    const t = Date.now();
+    const url = projectId ? `${getBackendApiUrl()}/api/settings?projectId=${projectId}&t=${t}` : `${getBackendApiUrl()}/api/settings?t=${t}`;
+    const res = await fetch(url, { cache: 'no-store' });
     if (res.ok) {
       const text = await res.text();
       try {

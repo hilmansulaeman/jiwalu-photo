@@ -886,13 +886,21 @@ func (s *PostgresStore) UpsertFilter(filter models.Filter) error {
 
 
 func (p *PostgresStore) GetDeviceSettings() map[string]any {
-	// Not implemented for postgres yet
-	return make(map[string]any)
+	settings := make(map[string]any)
+	file, err := os.ReadFile("data/device_settings.json")
+	if err == nil {
+		json.Unmarshal(file, &settings)
+	}
+	return settings
 }
 
 func (p *PostgresStore) UpdateDeviceSettings(settings map[string]any) error {
-	// Not implemented for postgres yet
-	return nil
+	file, err := json.MarshalIndent(settings, "", "  ")
+	if err != nil {
+		return err
+	}
+	os.MkdirAll("data", 0755)
+	return os.WriteFile("data/device_settings.json", file, 0644)
 }
 
 func (p *PostgresStore) CreateProject(project models.Project) error {
