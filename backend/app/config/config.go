@@ -36,6 +36,8 @@ type Config struct {
 	CleanupIntervalMins    int
 	HardwareAgentURL       string
 	HardwareAgentAPIKey    string
+	CameraProvider         string
+	CanonBridgeURL         string
 }
 
 const SessionRetentionDays = 7
@@ -76,6 +78,15 @@ func Load() Config {
 		CleanupIntervalMins:    getEnvIntAllowZero("CLEANUP_INTERVAL_MINUTES", 60),
 		HardwareAgentURL:       strings.TrimRight(getEnv("HARDWARE_AGENT_URL", "http://localhost:8787"), "/"),
 		HardwareAgentAPIKey:    strings.TrimSpace(os.Getenv("HARDWARE_AGENT_API_KEY")),
+		// CameraProvider picks which internal/camera.Provider backs
+		// /api/dslr/*: "gphoto-agent" (remote camera-agent binary, the
+		// existing default when HardwareAgentURL is set), "gphoto-local"
+		// (shell out to gphoto2 on this machine), "edsdk-bridge" (the real
+		// Canon EDSDK bridge in photobooth-ui/canon-bridge), or "mock"
+		// (canned responses, no hardware). Empty preserves the historical
+		// default behavior exactly.
+		CameraProvider: strings.ToLower(strings.TrimSpace(os.Getenv("CAMERA_PROVIDER"))),
+		CanonBridgeURL: strings.TrimRight(getEnv("CANON_BRIDGE_URL", "http://127.0.0.1:8788"), "/"),
 	}
 }
 

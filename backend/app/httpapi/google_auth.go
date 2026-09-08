@@ -16,8 +16,15 @@ import (
 	"urbanmenphoto/backend/app/models"
 )
 
+func googleRedirectURL() string {
+	if v := os.Getenv("GOOGLE_REDIRECT_URL"); v != "" {
+		return v
+	}
+	return "http://localhost:8787/api/auth/google/callback"
+}
+
 var googleOauthConfig = &oauth2.Config{
-	RedirectURL:  "http://localhost:8787/api/auth/google/callback",
+	RedirectURL:  googleRedirectURL(),
 	ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
 	ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 	Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},

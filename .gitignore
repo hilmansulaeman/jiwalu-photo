@@ -14,3 +14,11 @@ backend/backend/storage/
 .vercel
 .env*
 !.env.development
+
+# Editor swap files
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store

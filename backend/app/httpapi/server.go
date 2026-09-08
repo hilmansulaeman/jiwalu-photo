@@ -27,15 +27,40 @@ import (
 	"urbanmenphoto/backend/app/config"
 	"urbanmenphoto/backend/app/models"
 	"urbanmenphoto/backend/app/store"
+	"urbanmenphoto/backend/internal/camera"
 
 	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/snap"
 )
 
 type Server struct {
-	cfg     config.Config
-	store   store.Store
-	limiter *rateLimiter
+	cfg            config.Config
+	store          store.Store
+	limiter        *rateLimiter
+	cameraProvider camera.Provider
+}
+
+// selectCameraProvider picks the camera.Provider for /api/dslr/* based on
+// cfg.CameraProvider. The default branch (empty/unrecognized value)
+// reproduces the exact behavior dslr.go used to hardcode inline: proxy to
+// the Hardware Agent when one is configured, otherwise shell out to gphoto2
+// locally.
+func selectCameraProvider(cfg config.Config) camera.Provider {
+	switch cfg.CameraProvider {
+	case "mock":
+		return camera.NewMockProvider()
+	case "edsdk-bridge":
+		return camera.NewEdsdkBridgeProvider(cfg.CanonBridgeURL)
+	case "gphoto-local":
+		return camera.NewGphotoLocalProvider()
+	case "gphoto-agent":
+		return camera.NewGphotoAgentProvider(cfg.HardwareAgentURL, cfg.HardwareAgentAPIKey, cfg.MaxBodyBytes)
+	default:
+		if cfg.HardwareAgentURL != "" {
+			return camera.NewGphotoAgentProvider(cfg.HardwareAgentURL, cfg.HardwareAgentAPIKey, cfg.MaxBodyBytes)
+		}
+		return camera.NewGphotoLocalProvider()
+	}
 }
 
 type response struct {
@@ -64,9 +89,10 @@ const (
 
 func NewServer(cfg config.Config, jsonStore store.Store) *Server {
 	return &Server{
-		cfg:     cfg,
-		store:   jsonStore,
-		limiter: newRateLimiter(time.Minute),
+		cfg:            cfg,
+		store:          jsonStore,
+		limiter:        newRateLimiter(time.Minute),
+		cameraProvider: selectCameraProvider(cfg),
 	}
 }
 
@@ -88,6 +114,7 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("/api/projects", s.handlePublicProjects)
 	mux.HandleFunc("/api/dslr/cameras", s.handleDSLRCameras)
 	mux.HandleFunc("/api/dslr/capture", s.handleDSLRCapture)
+	mux.HandleFunc("/api/dslr/liveview", s.handleDSLRLiveView)
 	mux.HandleFunc("/api/admin/auth/login", s.handleAdminLogin)
 	mux.HandleFunc("/api/admin/auth/login/verify-otp", s.handleAdminVerifyOTP)
 	mux.HandleFunc("/api/admin/auth/2fa/toggle", s.handleAdminToggle2FA)
@@ -2115,7 +2142,7 @@ func (s *Server) verifyPaymentWebhook(r *http.Request, body models.PaymentWebhoo
 	if s.cfg.PaymentWebhookSecret != "" {
 		return errors.New("Payment webhook secret is invalid or missing.")
 	}
-	return nil
+	return errors.New("Payment webhook is not authenticated: no secret or signature provided.")
 }
 
 func normalizeMidtransPaymentStatus(body models.PaymentWebhookRequest) string {
