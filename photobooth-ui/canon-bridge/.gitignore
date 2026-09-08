@@ -1,0 +1,8 @@
+vendor/edsdk/*.dll
+vendor/edsdk/*.h
+vendor/edsdk/*.lib
+captures/
+bin/
+obj/
+dist/
+*.user

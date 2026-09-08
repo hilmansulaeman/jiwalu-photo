@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet --version)",
+      "Bash(dotnet build *)",
+      "Bash(git -C /Applications/XAMPP/xamppfiles/htdocs/jiwalu-photo status --short -- photobooth-ui/canon-bridge)",
+      "Bash(go build *)",
+      "Bash(dotnet run *)",
+      "Bash(echo \"started pid $!\")"
+    ]
+  }
+}
