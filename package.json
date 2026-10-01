@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "vite --host",
     "backend:dev": "cd backend && go run ./cmd/api",
-    "hardware:dev": "cd backend && ALLOWED_ORIGINS=http://localhost:5173,http://localhost:8788 go run ./cmd/camera-agent",
     "kiosk:start": "npm run build -- --mode kiosk && cd backend && go run ./cmd/api",
     "backend:admin": "cd backend && go run ./cmd/admin",
     "build": "vite build",

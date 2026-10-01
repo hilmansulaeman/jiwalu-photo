@@ -11,8 +11,8 @@ import (
 
 // Supabase Storage is optional so a kiosk can still run without an internet
 // connection. When configured, captured and finalized images are uploaded to
-// the bucket and the local disk is used only as a short-lived gphoto2 staging
-// area.
+// the bucket and the local disk is used only as a short-lived EDSDK bridge
+// capture staging area.
 func (s *Server) hasSupabaseStorage() bool {
 	return s.cfg.SupabaseURL != "" && s.cfg.SupabaseServiceRoleKey != "" && s.cfg.SupabaseBucket != ""
 }

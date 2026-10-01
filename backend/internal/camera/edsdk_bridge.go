@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -98,6 +99,10 @@ func (p *EdsdkBridgeProvider) Capture(ctx context.Context, port string) ([]byte,
 		return nil, fmt.Errorf("read Canon bridge capture: %w", err)
 	}
 	return content, nil
+}
+
+func pathSegment(value string) string {
+	return url.PathEscape(strings.TrimSpace(value))
 }
 
 func (p *EdsdkBridgeProvider) LiveViewFrame(ctx context.Context) ([]byte, string, error) {

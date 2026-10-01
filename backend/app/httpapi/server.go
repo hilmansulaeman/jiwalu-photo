@@ -40,29 +40,6 @@ type Server struct {
 	cameraProvider camera.Provider
 }
 
-// selectCameraProvider picks the camera.Provider for /api/dslr/* based on
-// cfg.CameraProvider. The default branch (empty/unrecognized value)
-// reproduces the exact behavior dslr.go used to hardcode inline: proxy to
-// the Hardware Agent when one is configured, otherwise shell out to gphoto2
-// locally.
-func selectCameraProvider(cfg config.Config) camera.Provider {
-	switch cfg.CameraProvider {
-	case "mock":
-		return camera.NewMockProvider()
-	case "edsdk-bridge":
-		return camera.NewEdsdkBridgeProvider(cfg.CanonBridgeURL)
-	case "gphoto-local":
-		return camera.NewGphotoLocalProvider()
-	case "gphoto-agent":
-		return camera.NewGphotoAgentProvider(cfg.HardwareAgentURL, cfg.HardwareAgentAPIKey, cfg.MaxBodyBytes)
-	default:
-		if cfg.HardwareAgentURL != "" {
-			return camera.NewGphotoAgentProvider(cfg.HardwareAgentURL, cfg.HardwareAgentAPIKey, cfg.MaxBodyBytes)
-		}
-		return camera.NewGphotoLocalProvider()
-	}
-}
-
 type response struct {
 	Data  any       `json:"data,omitempty"`
 	Error *apiError `json:"error,omitempty"`
@@ -92,7 +69,7 @@ func NewServer(cfg config.Config, jsonStore store.Store) *Server {
 		cfg:            cfg,
 		store:          jsonStore,
 		limiter:        newRateLimiter(time.Minute),
-		cameraProvider: selectCameraProvider(cfg),
+		cameraProvider: camera.NewEdsdkBridgeProvider(cfg.CanonBridgeURL),
 	}
 }
 
@@ -160,9 +137,6 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("/api/admin/frames_gif/upload", s.handleAdminFrameGifUpload)
 	mux.HandleFunc("/api/admin/frames_gif/", s.handleAdminFrameGifByID)
 
-	mux.HandleFunc("/api/printers", s.handlePrinters)
-	mux.HandleFunc("/api/prints", s.handlePrints)
-	mux.HandleFunc("/api/prints/", s.handlePrintByID)
 
 	mux.HandleFunc("/files/", s.handleFiles)
 
@@ -227,7 +201,7 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 
 	// The kiosk runs this API on the same computer that owns the DSLR. When a
 	// frontend build is present, serve it from this process so the browser and
-	// gphoto2 backend share one local origin (http://localhost:8787).
+	// Canon EDSDK bridge share one local origin (http://localhost:8787).
 	if s.serveKioskFrontend(w, r) {
 		return
 	}

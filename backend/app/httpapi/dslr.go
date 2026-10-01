@@ -72,9 +72,9 @@ func (s *Server) handleDSLRCapture(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, response{Data: map[string]string{"url": url}})
 }
 
-// detectDSLRCameras and captureDSLR know nothing about gphoto2, the Hardware
-// Agent HTTP contract, or the Canon EDSDK bridge — that's all behind
-// s.cameraProvider (see internal/camera). Only the storage decision
+// detectDSLRCameras and captureDSLR know nothing about the Canon EDSDK bridge
+// HTTP contract — that's all behind s.cameraProvider (see internal/camera).
+// Only the storage decision
 // (Supabase vs local /files/tether) stays here, since it's shared by every
 // provider.
 

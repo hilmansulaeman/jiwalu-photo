@@ -12,7 +12,7 @@ import { fetchCustomFrames, setCustomFrameDisabled, validateFrameConfig } from '
 import { FRAMES } from '../utils/photoConfig.js';
 import { BACKEND_API_URL, backendRequest, formatCurrency, formatDateTime, getBackendApiUrl, reportMonitoringError } from '../utils/backendApi.js';
 import { stopStream, listVideoDevices } from '../utils/camera.js';
-import { captureDslrPhoto, listDslrCameras, listHardwarePrinters } from '../utils/dslr.js';
+import { captureDslrPhoto, listDslrCameras } from '../utils/dslr.js';
 import { clearRecoveryHistory, getRecoveryHistory, getRecoverySession, removeRecoverySession, saveRecoverySession } from '../utils/sessionRecovery.js';
 import AdminOverview from './AdminOverview.jsx';
 import ProfileTab from './ProfileTab';
@@ -371,9 +371,6 @@ function KioskSettingsTab({ projectId, adminToken, onBack }) {
   const [cameraMessage, setCameraMessage] = useState('');
   const [refreshingCameraId, setRefreshingCameraId] = useState('');
   const [lastRefreshedCameraId, setLastRefreshedCameraId] = useState('');
-  const [hardwarePrinters, setHardwarePrinters] = useState([]);
-  const [printerMessage, setPrinterMessage] = useState('');
-  const [isLoadingPrinters, setIsLoadingPrinters] = useState(false);
   const [isTestingCamera, setIsTestingCamera] = useState(false);
   const [previewCameraId, setPreviewCameraId] = useState('');
   const [isTestPrintActive, setIsTestPrintActive] = useState(false);
@@ -448,24 +445,6 @@ function KioskSettingsTab({ projectId, adminToken, onBack }) {
 
   useEffect(() => {
     loadCameraDevices();
-  }, []);
-
-  const loadHardwarePrinters = async () => {
-    setIsLoadingPrinters(true);
-    try {
-      const printers = await listHardwarePrinters();
-      setHardwarePrinters(printers);
-      setPrinterMessage(`${printers.length} printer Windows terdeteksi dari Hardware Agent.`);
-    } catch (error) {
-      setHardwarePrinters([]);
-      setPrinterMessage(error.message || 'Hardware Agent tidak dapat membaca printer.');
-    } finally {
-      setIsLoadingPrinters(false);
-    }
-  };
-
-  useEffect(() => {
-    loadHardwarePrinters();
   }, []);
 
   const updateCameraProfile = (profileId, changes) => {
@@ -913,7 +892,7 @@ function KioskSettingsTab({ projectId, adminToken, onBack }) {
                 />
                 <div style={{ marginBottom: '0.4rem', color: '#495057', fontWeight: 700, fontSize: '0.82rem' }}>Mode Kamera</div>
                 <select value={profile.captureMode || 'dslr'} onChange={(event) => updateCameraProfile(profile.id, { captureMode: event.target.value })} style={{ width: '100%', marginBottom: '0.6rem', padding: '0.7rem', borderRadius: '8px', border: '1px solid #ced4da', background: 'white' }}>
-                  <option value="dslr">DSLR (USB / gphoto2)</option>
+                  <option value="dslr">DSLR (Canon EDSDK)</option>
                   <option value="webcam">Webcam (Browser / HP)</option>
                 </select>
 
@@ -1006,79 +985,6 @@ function KioskSettingsTab({ projectId, adminToken, onBack }) {
             ))}
           </div>
           <p style={{ margin: '0 0 1rem', fontSize: '0.78rem', color: '#868e96' }}>Pilih ID Canon berbeda untuk setiap posisi. ID berformat canon:serial bersifat permanen; jangan simpan pilihan bertanda ID sementara.</p>
-        </div>
-
-        <div style={{ marginBottom: '1.5rem', padding: '1.25rem', borderRadius: '8px', border: '1px solid #e5e7eb', background: '#f8fafc' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', marginBottom: '1rem' }}>
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.35rem', fontWeight: 'bold', color: '#495057' }}>Printer Booth</label>
-              <p style={{ fontSize: '0.82rem', color: '#868e96', margin: 0 }}>Foto dikirim langsung oleh Hardware Agent ke driver OS/Laptop, tanpa dialog print browser.</p>
-            </div>
-            <button
-              type="button"
-              onClick={loadHardwarePrinters}
-              disabled={isLoadingPrinters}
-              style={{ padding: '0.65rem 1rem', background: '#40a3eb', color: 'white', border: 'none', borderRadius: '8px', cursor: isLoadingPrinters ? 'wait' : 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}
-            >
-              {isLoadingPrinters ? 'Membaca...' : 'Refresh Printer'}
-            </button>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.45rem', fontWeight: 'bold', color: '#495057', fontSize: '0.9rem' }}>Mode Print</label>
-              <div style={{ padding: '0.8rem', borderRadius: '8px', border: '1px solid #bbf7d0', background: '#f0fdf4', color: '#166534', fontWeight: 800 }}>Printer Windows melalui Hardware Agent</div>
-              <p style={{ fontSize: '0.78rem', color: '#868e96', marginTop: '0.35rem' }}>Menggunakan driver printer yang terpasang di Mini PC.</p>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.45rem', fontWeight: 'bold', color: '#495057', fontSize: '0.9rem' }}>Printer (Terinstall di OS via USB)</label>
-              <select
-                value={settings.printerName || ''}
-                onChange={(event) => setSettings(previous => ({ ...previous, printerName: event.target.value, printMode: 'hardware_agent' }))}
-                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ced4da', fontSize: '1rem', background: 'white' }}
-              >
-                <option value="">Pilih printer dari Hardware Agent</option>
-                {hardwarePrinters.map(printer => <option key={printer.name} value={printer.name}>{printer.name}{printer.isDefault ? ' (Default Windows)' : ''}</option>)}
-              </select>
-              <p style={{ fontSize: '0.78rem', color: hardwarePrinters.length ? '#166534' : '#b91c1c', marginTop: '0.35rem' }}>{printerMessage || 'Klik Refresh Printer untuk membaca driver Windows.'}</p>
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.9rem 1rem', borderRadius: '8px', border: '1px solid #e5e7eb', background: 'white', color: '#495057', fontWeight: 'bold' }}>
-              <input
-                type="checkbox"
-                name="autoPrintEnabled"
-                checked={Boolean(settings.autoPrintEnabled)}
-                onChange={handleChange}
-                style={{ width: 18, height: 18, accentColor: '#40a3eb' }}
-              />
-              Auto print setelah foto selesai
-            </label>
-
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.45rem', fontWeight: 'bold', color: '#495057', fontSize: '0.9rem' }}>Delay Auto Print (detik)</label>
-              <input
-                type="number"
-                name="printDelaySeconds"
-                value={settings.printDelaySeconds ?? 1.5}
-                onChange={handleChange}
-                min="0"
-                max="10"
-                step="0.5"
-                style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ced4da', fontSize: '1rem' }}
-              />
-            </div>
-          </div>
-
-          <textarea
-            name="printNote"
-            value={settings.printNote || ''}
-            onChange={handleChange}
-            placeholder="Catatan operator, contoh: set printer default ke 4R borderless sebelum event."
-            style={{ width: '100%', minHeight: '76px', marginTop: '1rem', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ced4da', fontSize: '0.95rem', resize: 'vertical' }}
-          />
         </div>
 
         <div style={{ marginBottom: '2rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
@@ -1370,18 +1276,8 @@ function BoothHealthTab({ adminToken }) {
           : `${cameras.length} Canon DSLR terdeteksi dan semua posisi aktif siap dipotret.`;
       nextItems.push(createHealthItem('camera', 'Canon DSLR (EDSDK)', status, detail, `${configured.length} posisi aktif`));
     } catch (err) {
-      nextItems.push(createHealthItem('camera', 'Canon DSLR (EDSDK)', 'fail', err.message || 'Tidak bisa membaca Hardware Agent.'));
+      nextItems.push(createHealthItem('camera', 'Canon DSLR (EDSDK)', 'fail', err.message || 'Tidak bisa membaca Canon EDSDK bridge.'));
     }
-
-    const printStatus = settings.autoPrintEnabled
-      ? (settings.printerName ? 'ok' : 'warn')
-      : 'warn';
-    const printDetail = settings.autoPrintEnabled
-      ? settings.printerName
-        ? `Auto print aktif melalui Hardware Agent ke ${settings.printerName}.`
-        : 'Auto print aktif, tetapi printer belum dipilih.'
-      : 'Auto print mati. Operator perlu klik PRINT PHOTO manual.';
-    nextItems.push(createHealthItem('printer', 'Hardware Printer', printStatus, printDetail, settings.printerName || 'Belum dipilih'));
 
     try {
       const key = `booth_health_probe_${Date.now()}`;

@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { listDslrCameras, listHardwarePrinters } from '../utils/dslr.js';
+import { listDslrCameras } from '../utils/dslr.js';
 import { getKioskSettings, saveKioskSettings, getActiveProjectId, setActiveProjectId, syncKioskSettings } from '../utils/kioskConfig.js';
 import { getBackendApiUrl } from '../utils/backendApi.js';
-import { X, Save, Lock, Camera, Printer as PrinterIcon, Download, Power, MonitorPlay, Globe, LayoutTemplate } from './ui/icons.jsx';
+import { X, Save, Lock, Camera, Download, Power, MonitorPlay, Globe, LayoutTemplate } from './ui/icons.jsx';
 
 export default function DeviceSetupModal({ onClose }) {
   const [settings, setSettings] = useState(getKioskSettings());
-  const [printers, setPrinters] = useState([]);
   const [cameras, setCameras] = useState([]);
   const [webcams, setWebcams] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -50,14 +49,6 @@ export default function DeviceSetupModal({ onClose }) {
     async function loadHardware() {
       try {
         setLoading(true);
-        // Load hardware printers
-        try {
-          const hwPrinters = await listHardwarePrinters();
-          setPrinters(hwPrinters || []);
-        } catch (err) {
-          console.warn('Could not load hardware printers', err);
-        }
-        
         // Load projects
         try {
           const projRes = await fetch(`${getBackendApiUrl()}/api/projects`);
@@ -202,38 +193,6 @@ export default function DeviceSetupModal({ onClose }) {
                 </optgroup>
               </select>
               <p style={styles.hint}>Pilih kamera utama yang akan digunakan booth ini.</p>
-            </div>
-          </div>
-
-          <div style={styles.section}>
-            <h3 style={styles.sectionTitle}><PrinterIcon size={18}/> Printer</h3>
-            <div style={styles.card}>
-              <div style={styles.row}>
-                <label style={styles.label}>Enable Printing (Auto Print)</label>
-                <input 
-                  type="checkbox" 
-                  checked={!!settings.autoPrintEnabled}
-                  onChange={(e) => handleChange('autoPrintEnabled', e.target.checked)}
-                  style={styles.toggle}
-                />
-              </div>
-              {settings.autoPrintEnabled && (
-                <div style={{ marginTop: '1rem' }}>
-                  <select 
-                    style={styles.select}
-                    value={settings.printerName || ''}
-                    onChange={(e) => handleChange('printerName', e.target.value)}
-                  >
-                    <option value="">Pilih Printer Hardware</option>
-                    {(printers || []).map(p => (
-                      <option key={p.name} value={p.name}>
-                        {p.name} {p.isDefault ? '(Default)' : ''}
-                      </option>
-                    ))}
-                  </select>
-                  <p style={styles.hint}>Saat aktif, foto akan otomatis dikirim ke printer di atas secara silent.</p>
-                </div>
-              )}
             </div>
           </div>
 

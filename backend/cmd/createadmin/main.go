@@ -25,9 +25,12 @@ func main() {
 	}
 	defer conn.Close(ctx)
 
-	email := "admin@gmail.com"
-	password := "admin123456" // password must be at least 10 chars!
-    // Wait, the HashPassword requires 10 characters! Let me use "admin123456"
+	email := os.Getenv("ADMIN_EMAIL")
+	password := os.Getenv("ADMIN_PASSWORD")
+	if email == "" || password == "" {
+		fmt.Fprintln(os.Stderr, "ADMIN_EMAIL and ADMIN_PASSWORD must be set")
+		os.Exit(1)
+	}
 
 	hash, err := auth.HashPassword(password)
 	if err != nil {

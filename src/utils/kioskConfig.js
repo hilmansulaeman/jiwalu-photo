@@ -19,11 +19,6 @@ export const defaultSettings = {
   // Camera 1 is kept compatible with the previous single-camera setup.
   cameraProfiles: [],
   idleTimeout: 60, // in seconds
-  autoPrintEnabled: false,
-  printMode: 'hardware_agent',
-  printDelaySeconds: 1.5,
-  printerName: '',
-  printNote: '',
   cameraTimer: 3,
   sessionTimer: 5
 };
@@ -103,7 +98,6 @@ export function saveKioskSettings(settings) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       ...settings,
       cameraProfiles,
-      printMode: 'hardware_agent',
       // Preserve these legacy fields for existing kiosk configurations.
       cameraDeviceId: firstCamera.deviceId,
       cameraDeviceLabel: firstCamera.deviceLabel,

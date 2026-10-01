@@ -13,7 +13,7 @@ const isPublicHTTPSPage = typeof window !== 'undefined'
 export const BACKEND_API_URL = (
   (useSameOriginBackend && sameOriginBackend)
   || import.meta.env.VITE_BACKEND_API_URL
-  || (isPublicHTTPSPage ? 'https://jiwaluphoto-backend-staging.vercel.app' : 'http://localhost:8788')
+  || (isPublicHTTPSPage ? 'https://jiwaluphoto-backend-staging.vercel.app' : 'http://localhost:8787')
 ).replace(/\/$/, '');
 
 export function getBackendApiUrl() {

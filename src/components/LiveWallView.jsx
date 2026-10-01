@@ -4,7 +4,6 @@ import { QRCodeSVG } from 'qrcode.react';
 import { backendRequest, reportMonitoringError } from '../utils/backendApi.js';
 import { getKioskSettings, getPublicGalleryBaseUrl } from '../utils/kioskConfig.js';
 import { saveRecoverySession } from '../utils/sessionRecovery.js';
-import { queueHardwarePrint } from '../utils/dslr.js';
 
 const DUMMY_COMMENTS = [
   "Wah, seru banget eventnya! 🔥",
@@ -149,26 +148,6 @@ export default function LiveWallView({ orderDetails, upsellDetails, capturedPhot
       createdAt: new Date().toISOString(),
       ...updates,
     });
-  };
-
-  const safePrint = async (trigger = 'manual', imageUrl = '') => {
-    try {
-      if (!kioskSettings.printerName) throw new Error('Pilih printer HiTi terlebih dahulu di Admin → Kiosk.');
-      if (!imageUrl) throw new Error('Gambar hasil foto belum siap untuk dicetak.');
-      await queueHardwarePrint({ printerName: kioskSettings.printerName, imageUrl, copies: 1 });
-    } catch (err) {
-      reportMonitoringError({
-        category: 'print',
-        sessionId: backendSession?.id || localGalleryId,
-        message: err.message || 'Gagal membuka dialog print.',
-        source: 'livewall',
-        metadata: {
-          trigger,
-          printerName: kioskSettings.printerName || '',
-          autoPrintEnabled: Boolean(kioskSettings.autoPrintEnabled),
-        },
-      });
-    }
   };
 
   useEffect(() => {
@@ -405,12 +384,6 @@ export default function LiveWallView({ orderDetails, upsellDetails, capturedPhot
             console.error('Failed to save local gallery preview', storageErr);
           }
           setIsProcessing(false);
-          if (kioskSettings.autoPrintEnabled) {
-            const printDelay = Math.max(0, Number(kioskSettings.printDelaySeconds || 0)) * 1000;
-            setTimeout(() => {
-              safePrint('auto', primaryPrintImage);
-            }, printDelay);
-          }
 
           if (backendSession?.id && backendSession?.customerToken) {
             try {
@@ -497,7 +470,7 @@ export default function LiveWallView({ orderDetails, upsellDetails, capturedPhot
     return () => {
       active = false;
     };
-  }, [orderDetails, upsellDetails, backendSession?.id, kioskSettings.autoPrintEnabled, kioskSettings.printDelaySeconds]);
+  }, [orderDetails, upsellDetails, backendSession?.id]);
 
   const handleSendWhatsApp = async (e) => {
     e.preventDefault();

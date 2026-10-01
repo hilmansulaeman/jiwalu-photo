@@ -34,9 +34,6 @@ type Config struct {
 	AdminTokenTTLHrs       int
 	MaxBodyBytes           int64
 	CleanupIntervalMins    int
-	HardwareAgentURL       string
-	HardwareAgentAPIKey    string
-	CameraProvider         string
 	CanonBridgeURL         string
 }
 
@@ -76,17 +73,7 @@ func Load() Config {
 		AdminTokenTTLHrs:       getEnvInt("ADMIN_TOKEN_TTL_HOURS", 12),
 		MaxBodyBytes:           int64(getEnvInt("MAX_BODY_BYTES", 40*1024*1024)),
 		CleanupIntervalMins:    getEnvIntAllowZero("CLEANUP_INTERVAL_MINUTES", 60),
-		HardwareAgentURL:       strings.TrimRight(getEnv("HARDWARE_AGENT_URL", "http://localhost:8787"), "/"),
-		HardwareAgentAPIKey:    strings.TrimSpace(os.Getenv("HARDWARE_AGENT_API_KEY")),
-		// CameraProvider picks which internal/camera.Provider backs
-		// /api/dslr/*: "gphoto-agent" (remote camera-agent binary, the
-		// existing default when HardwareAgentURL is set), "gphoto-local"
-		// (shell out to gphoto2 on this machine), "edsdk-bridge" (the real
-		// Canon EDSDK bridge in photobooth-ui/canon-bridge), or "mock"
-		// (canned responses, no hardware). Empty preserves the historical
-		// default behavior exactly.
-		CameraProvider: strings.ToLower(strings.TrimSpace(os.Getenv("CAMERA_PROVIDER"))),
-		CanonBridgeURL: strings.TrimRight(getEnv("CANON_BRIDGE_URL", "http://127.0.0.1:8788"), "/"),
+		CanonBridgeURL:         strings.TrimRight(getEnv("CANON_BRIDGE_URL", "http://127.0.0.1:8788"), "/"),
 	}
 }
 
@@ -147,15 +134,15 @@ func dotEnvPaths() []string {
 	return []string{filepath.Join("backend", ".env"), ".env"}
 }
 
+// defaultRuntimeDirs assumes the process always runs with cwd = backend/
+// (every script in package.json does "cd backend && ..." first). A cwd-name
+// guess here previously caused "backend/data" to resolve to "backend/backend/data"
+// whenever that guess failed (e.g. os.Getwd() erroring).
 func defaultRuntimeDirs() (string, string) {
 	if os.Getenv("VERCEL") != "" {
 		return filepath.Join(os.TempDir(), "urbanmenphoto", "data"), filepath.Join(os.TempDir(), "urbanmenphoto", "storage")
 	}
-	cwd, err := os.Getwd()
-	if err == nil && strings.EqualFold(filepath.Base(cwd), "backend") {
-		return "data", "storage"
-	}
-	return filepath.Join("backend", "data"), filepath.Join("backend", "storage")
+	return "data", "storage"
 }
 
 func getEnv(key string, fallback string) string {
